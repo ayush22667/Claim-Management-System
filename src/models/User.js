@@ -1,14 +1,11 @@
-class User {
-  constructor(id, name, email, password, role) {
-    this.id = id;
-    this.name = name.trim();
-    this.email = email.trim().toLowerCase();
-    this.password = password.trim();
-    this.role = role.trim().charAt(0).toUpperCase() + role.trim().slice(1).toLowerCase();
-    this.policies = []; // Stores policy IDs purchased by the user
-  }
-}
+const mongoose = require("mongoose");
 
-let users = [];
+const UserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ["User", "Admin"], required: true },
+  policies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Policy" }]
+});
 
-module.exports = { User, users };
+module.exports = mongoose.model("User", UserSchema);

@@ -1,46 +1,67 @@
-const { Claim, claims } = require("../models/Claim");
-const { policies } = require("../models/Policy");
-const { users } = require("../models/User");
+const Claim = require("../models/Claim");
+const Policy = require("../models/Policy");
+const Policyholder = require("../models/Policyholder");
 
-exports.createClaim = (data) => {
-  const { userId, policyId, claimNumber, amount, dateFiled } = data;
-
+// ✅ Create a New Claim
+exports.createClaim = async ({
+  userId,
+  policyId,
+  claimNumber,
+  amount,
+  dateFiled,
+}) => {
   if (!userId || !policyId || !claimNumber || !amount || !dateFiled) {
     throw new Error("All fields are required.");
   }
 
-  const user = users.find(u => u.id === parseInt(userId));
-  if (!user) throw new Error("User not found.");
-
-  if (!user.policies.includes(parseInt(policyId))) {
+  // ✅ Ensure user owns the policy
+  const policyholder = await Policyholder.findOne({
+    userId,
+    policies: policyId,
+  });
+  if (!policyholder)
     throw new Error("User does not own this policy and cannot file a claim.");
-  }
 
-  const policy = policies.find(p => p.id === parseInt(policyId));
+  // ✅ Ensure policy exists
+  const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy not found.");
 
-  if (parseFloat(amount) > policy.coverageAmount) {
-    throw new Error(`Claim amount cannot exceed policy coverage amount (${policy.coverageAmount}).`);
+  // ✅ Check claim amount
+  if (amount > policy.coverageAmount) {
+    throw new Error(
+      `Claim amount cannot exceed policy coverage amount (${policy.coverageAmount}).`
+    );
   }
 
-  const newClaim = new Claim(claims.length + 1, policyId, userId, claimNumber, amount, "Pending", dateFiled);
-  claims.push(newClaim);
-  return newClaim;
+  // ✅ Save claim in MongoDB
+  const newClaim = new Claim({
+    userId,
+    policyId,
+    claimNumber,
+    amount,
+    status: "Pending",
+    dateFiled,
+  });
+  return await newClaim.save();
 };
 
-exports.getClaimsByUser = (userId) => {
-  return claims.filter(c => c.userId === parseInt(userId));
+// ✅ Get All Claims for a User
+exports.getClaimsByUser = async (userId) => {
+  return await Claim.find({ userId }).populate(
+    "policyId",
+    "policyNumber type coverageAmount"
+  );
 };
 
-exports.deleteClaim = (claimId, userId) => {
-  const claimIndex = claims.findIndex(c => c.id === parseInt(claimId));
-  if (claimIndex === -1) throw new Error("Claim not found.");
+// ✅ Delete a Claim
+exports.deleteClaim = async (claimId, userId) => {
+  const claim = await Claim.findById(claimId);
+  if (!claim) throw new Error("Claim not found.");
+  if (claim.userId.toString() !== userId)
+    throw new Error("Unauthorized action.");
+  if (claim.status !== "Pending")
+    throw new Error("Cannot delete a processed claim.");
 
-  const claim = claims[claimIndex];
-
-  if (claim.userId !== parseInt(userId)) throw new Error("Unauthorized action.");
-  if (claim.status !== "Pending") throw new Error("Cannot cancel an approved/rejected claim.");
-
-  claims.splice(claimIndex, 1);
+  await Claim.deleteOne({ _id: claimId });
   return { message: "Claim canceled successfully." };
 };

@@ -1,11 +1,13 @@
-const { policies } = require("../models/Policy");
+const Policy = require("../models/Policy");
 
-exports.getAllPolicies = () => {
-  return policies;
+// ✅ Get All Policies
+exports.getAllPolicies = async () => {
+  return await Policy.find();
 };
 
-exports.getPolicyById = (policyId) => {
-  const policy = policies.find(p => p.id === parseInt(policyId));
+// ✅ Get Policy by ID
+exports.getPolicyById = async (policyId) => {
+  const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy not found.");
   return policy;
 };

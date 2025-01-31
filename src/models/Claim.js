@@ -1,15 +1,20 @@
-class Claim {
-  constructor(id, policyId, userId, claimNumber, amount, status, dateFiled) {
-    this.id = id;
-    this.policyId = policyId;
-    this.userId = userId;
-    this.claimNumber = claimNumber.trim();
-    this.amount = parseFloat(amount);
-    this.status = status.trim();
-    this.dateFiled = dateFiled;
-  }
-}
+const mongoose = require("mongoose");
 
-let claims = [];
+const ClaimSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  policyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Policy",
+    required: true,
+  },
+  claimNumber: { type: String, required: true, unique: true },
+  amount: { type: Number, required: true },
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Rejected"],
+    default: "Pending",
+  },
+  dateFiled: { type: Date, default: Date.now },
+});
 
-module.exports = { Claim, claims };
+module.exports = mongoose.model("Claim", ClaimSchema);

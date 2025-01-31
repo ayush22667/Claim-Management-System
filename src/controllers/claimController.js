@@ -1,26 +1,29 @@
 const claimService = require("../services/claimService");
 
-exports.createClaim = (req, res) => {
+// ✅ Create a New Claim
+exports.createClaim = async (req, res) => {
   try {
-    const newClaim = claimService.createClaim(req.body);
+    const newClaim = await claimService.createClaim(req.body);
     res.status(201).json(newClaim);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.getClaimsByUser = (req, res) => {
+// ✅ Get All Claims for a User
+exports.getClaimsByUser = async (req, res) => {
   try {
-    const claims = claimService.getClaimsByUser(req.params.userId);
+    const claims = await claimService.getClaimsByUser(req.params.userId);
     res.json(claims);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.deleteClaim = (req, res) => {
+// ✅ Delete a Claim (Cancel by User)
+exports.deleteClaim = async (req, res) => {
   try {
-    const message = claimService.deleteClaim(req.params.id, req.query.userId);
+    const message = await claimService.deleteClaim(req.params.id, req.query.userId);
     res.json(message);
   } catch (error) {
     res.status(400).json({ error: error.message });

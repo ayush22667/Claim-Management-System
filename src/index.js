@@ -1,8 +1,13 @@
 const express = require("express");
 const app = express();
 
-//load config from env file
-const PORT = process.env.PORT || 3000;
+
+const connectDB = require("./config/database"); // Import MongoDB connection
+require("dotenv").config();
+
+// Connect to MongoDB
+connectDB();
+
 
 // Importing Routes
 const userRoutes = require("./routes/userRoutes");
@@ -19,11 +24,12 @@ app.use("/claims", claimRoutes);
 app.use("/admin", adminRoutes);
 
 
-
+//load config from env file
+const PORT = process.env.PORT || 3000;
 
 // Default Route
 app.get("/", (req, res) => {
-  res.send("Welcome to the Stateless Claims Management System!");
+  res.send("Welcome to the StateFull Claims Management System!");
 });
 
 // Start Server;

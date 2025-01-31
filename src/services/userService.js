@@ -1,19 +1,19 @@
-const { User, users } = require("../models/User");
-const { policies } = require("../models/Policy");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
+const Policy = require("../models/Policy");
+const Policyholder = require("../models/Policyholder");
 
 const ADMIN_SECRET_KEY = "supersecureadminkey"; // Change this in production
 
-exports.registerUser = (data) => {
+// ✅ Register User (With Password Hashing)
+exports.registerUser = async (data) => {
   let { name, email, password, role, adminKey } = data;
 
   if (!name || !email || !password || !role) {
     throw new Error("All fields are required.");
   }
 
-  name = name.trim();
   email = email.trim().toLowerCase();
-  password = password.trim();
-  role = role.trim().charAt(0).toUpperCase() + role.trim().slice(1).toLowerCase();
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -24,73 +24,98 @@ exports.registerUser = (data) => {
     throw new Error("Password must be at least 6 characters long.");
   }
 
-  if (users.find(user => user.email === email)) {
+  if (await User.findOne({ email })) {
     throw new Error("User already exists.");
   }
 
-  if (role === "Admin") {
-    if (!adminKey || adminKey !== ADMIN_SECRET_KEY) {
-      throw new Error("Invalid Admin registration key.");
-    }
-  } else if (role !== "User") {
-    throw new Error("Invalid role. Must be 'User' or 'Admin'.");
+  if (role === "Admin" && adminKey !== ADMIN_SECRET_KEY) {
+    throw new Error("Invalid Admin registration key.");
   }
 
-  const newUser = new User(users.length + 1, name, email, password, role);
-  users.push(newUser);
+  // ✅ Hash password before saving
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = new User({ name, email, password: hashedPassword, role });
+  await newUser.save();
   return newUser;
 };
 
-exports.loginUser = (email, password) => {
+// ✅ Login User (Compare Hashed Password)
+exports.loginUser = async (email, password) => {
   email = email.trim().toLowerCase();
-  password = password.trim();
 
-  const user = users.find(u => u.email === email && u.password === password);
+  const user = await User.findOne({ email });
   if (!user) throw new Error("Invalid email or password.");
 
-  return `Token_${user.id}_${Date.now()}`; // Mock authentication token
+  // ✅ Compare hashed password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Invalid email or password.");
+
+  return `Token_${user._id}_${Date.now()}`; // Mock authentication token
 };
 
-exports.updateUser = (userId, data) => {
-  let user = users.find(u => u.id === parseInt(userId));
+// ✅ Update User
+exports.updateUser = async (userId, data) => {
+  const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
 
   if (data.name) user.name = data.name.trim();
-  if (data.password && data.password.length >= 6) user.password = data.password.trim();
-  else if (data.password) throw new Error("Password must be at least 6 characters long.");
+  if (data.password && data.password.length >= 6) {
+    user.password = await bcrypt.hash(data.password.trim(), 10);
+  } else if (data.password) {
+    throw new Error("Password must be at least 6 characters long.");
+  }
 
+  await user.save();
   return user;
 };
 
-exports.deleteUser = (userId) => {
-  let user = users.find(u => u.id === parseInt(userId));
+// ✅ Soft Delete User (Instead of permanent deletion)
+exports.deleteUser = async (userId) => {
+  const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
 
-  user.isDisabled = true;
+  // Soft delete by marking `isDeleted: true`
+  await User.findByIdAndUpdate(userId, { isDeleted: true });
+
   return { message: "User account disabled successfully." };
 };
 
-exports.getAllPolicies = () => {
-  return policies;
+// ✅ Get All Policies
+exports.getAllPolicies = async () => {
+  return await Policy.find();
 };
 
-exports.buyPolicy = (userId, policyId) => {
-  let user = users.find(u => u.id === parseInt(userId));
+// ✅ Buy Policy (Fixed Policyholder Logic)
+exports.buyPolicy = async (userId, policyId) => {
+  const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
 
-  let policy = policies.find(p => p.id === parseInt(policyId));
+  const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy does not exist.");
 
-  if (!user.policies.includes(parseInt(policyId))) {
-    user.policies.push(parseInt(policyId));
+  // ✅ Check if the user is already a policyholder
+  let policyholder = await Policyholder.findOne({ userId });
+
+  if (policyholder) {
+    // ✅ Convert ObjectId to string before checking
+    const existingPolicies = policyholder.policies.map(p => p.toString());
+    if (!existingPolicies.includes(policyId.toString())) {
+      policyholder.policies.push(policyId);
+      await policyholder.save();
+    }
+  } else {
+    policyholder = new Policyholder({ userId, policies: [policyId] });
+    await policyholder.save();
   }
 
-  return { message: "Policy purchased successfully.", user };
+  return { message: "Policy purchased successfully.", policyholder };
 };
 
-exports.getUserPolicies = (userId) => {
-  const user = users.find(u => u.id === parseInt(userId));
-  if (!user) throw new Error("User not found.");
+// ✅ Get User's Purchased Policies
+exports.getUserPolicies = async (userId) => {
+  const policyholder = await Policyholder.findOne({ userId }).populate("policies");
+  if (!policyholder) throw new Error("User has not purchased any policies.");
 
-  return policies.filter(p => user.policies.includes(p.id));
+  return policyholder.policies;
 };

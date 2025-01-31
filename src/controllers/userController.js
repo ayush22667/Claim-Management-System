@@ -1,63 +1,70 @@
 const userService = require("../services/userService");
 
-exports.registerUser = (req, res) => {
+// ✅ Register User
+exports.registerUser = async (req, res) => {
   try {
-    const newUser = userService.registerUser(req.body);
+    const newUser = await userService.registerUser(req.body);
     res.status(201).json(newUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.loginUser = (req, res) => {
+// ✅ Login User
+exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const token = userService.loginUser(email, password);
+    const token = await userService.loginUser(email, password);
     res.json({ message: "Login successful", token });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
 };
 
-exports.updateUser = (req, res) => {
+// ✅ Update User
+exports.updateUser = async (req, res) => {
   try {
-    const updatedUser = userService.updateUser(req.params.id, req.body);
+    const updatedUser = await userService.updateUser(req.params.id, req.body);
     res.json(updatedUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.deleteUser = (req, res) => {
+// ✅ Delete User (Soft Delete)
+exports.deleteUser = async (req, res) => {
   try {
-    const message = userService.deleteUser(req.params.id);
+    const message = await userService.deleteUser(req.params.id);
     res.json(message);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.getAllPolicies = (req, res) => {
+// ✅ Get All Policies
+exports.getAllPolicies = async (req, res) => {
   try {
-    const policies = userService.getAllPolicies();
+    const policies = await userService.getAllPolicies();
     res.json(policies);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.buyPolicy = (req, res) => {
+// ✅ Buy Policy (Stateful - MongoDB)
+exports.buyPolicy = async (req, res) => {
   try {
-    const message = userService.buyPolicy(req.body.userId, req.body.policyId);
+    const message = await userService.buyPolicy(req.body.userId, req.body.policyId);
     res.json(message);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-exports.getUserPolicies = (req, res) => {
+// ✅ Get Policies Purchased by User
+exports.getUserPolicies = async (req, res) => {
   try {
-    const userPolicies = userService.getUserPolicies(req.query.userId);
+    const userPolicies = await userService.getUserPolicies(req.params.userId);
     res.json(userPolicies);
   } catch (error) {
     res.status(400).json({ error: error.message });

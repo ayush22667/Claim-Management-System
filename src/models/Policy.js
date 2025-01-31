@@ -1,14 +1,11 @@
-class Policy {
-  constructor(id, policyNumber, type, coverageAmount, startDate, endDate) {
-    this.id = id;
-    this.policyNumber = policyNumber.trim();
-    this.type = type.trim();
-    this.coverageAmount = parseFloat(coverageAmount);
-    this.startDate = startDate;
-    this.endDate = endDate;
-  }
-}
+const mongoose = require("mongoose");
 
-let policies = [];
+const PolicySchema = new mongoose.Schema({
+  policyNumber: { type: String, required: true, unique: true },
+  type: { type: String, required: true },
+  coverageAmount: { type: Number, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true }
+});
 
-module.exports = { Policy, policies };
+module.exports = mongoose.model("Policy", PolicySchema);
