@@ -1,6 +1,6 @@
 const adminService = require("../services/adminService");
 
-// ✅ Create a New Policy (Admin Only)
+// Create a New Policy (Admin Only)
 exports.createPolicy = async (req, res) => {
   try {
     const newPolicy = await adminService.createPolicy(req.body);
@@ -10,7 +10,7 @@ exports.createPolicy = async (req, res) => {
   }
 };
 
-// ✅ Update an Existing Policy (Admin Only)
+// Update an Existing Policy (Admin Only)
 exports.updatePolicy = async (req, res) => {
   try {
     const updatedPolicy = await adminService.updatePolicy(req.params.id, req.body);
@@ -20,7 +20,7 @@ exports.updatePolicy = async (req, res) => {
   }
 };
 
-// ✅ Delete a Policy (Admin Only)
+// Delete a Policy (Admin Only)
 exports.deletePolicy = async (req, res) => {
   try {
     const message = await adminService.deletePolicy(req.params.id);
@@ -30,7 +30,7 @@ exports.deletePolicy = async (req, res) => {
   }
 };
 
-// ✅ Get All Purchased Policies (Admin View)
+// Get All Purchased Policies (Admin View)
 exports.getAllPurchasedPolicies = async (req, res) => {
   try {
     const purchasedPolicies = await adminService.getAllPurchasedPolicies();
@@ -40,7 +40,7 @@ exports.getAllPurchasedPolicies = async (req, res) => {
   }
 };
 
-// ✅ Update Claim Status (Admin Approve/Reject)
+// Update Claim Status (Admin Approve/Reject)
 exports.updateClaimStatus = async (req, res) => {
   try {
     const updatedClaim = await adminService.updateClaimStatus(req.params.id, req.body.status);

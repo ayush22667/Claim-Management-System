@@ -1,26 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
+const { authenticateUser, isUser } = require("../middleware/auth");
 
-// ✅ Register a new user
+
 router.post("/register", userController.registerUser);
 
-// ✅ Login user
+// Login user
 router.post("/login", userController.loginUser);
 
-// ✅ Update user details
-router.put("/:id", userController.updateUser);
+// Update user details
+router.put("/:id", authenticateUser, isUser, userController.updateUser);
 
-// ✅ Soft delete user
-router.delete("/:id", userController.deleteUser);
+// Soft delete user
+router.delete("/:id", authenticateUser, isUser, userController.deleteUser);
 
-// ✅ Get all available policies
-router.get("/policies", userController.getAllPolicies);
+// Get all available policies
+router.get("/policies", authenticateUser, isUser, userController.getAllPolicies);
 
-// ✅ Buy a policy (User becomes policyholder)
-router.post("/buy-policy", userController.buyPolicy);
-
-// ✅ Get all policies purchased by a user
-router.get("/my-policies/:userId", userController.getUserPolicies);
+//Buy a policy (User becomes policyholder)
+router.post("/buy-policy", authenticateUser, isUser, userController.buyPolicy);
+router.get("/my-policies/:userId", authenticateUser, isUser, userController.getUserPolicies);
 
 module.exports = router;

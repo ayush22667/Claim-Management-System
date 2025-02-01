@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-
+const cookieParser = require('cookie-parser');
 
 const connectDB = require("./config/database"); // Import MongoDB connection
 require("dotenv").config();
@@ -8,14 +8,15 @@ require("dotenv").config();
 // Connect to MongoDB
 connectDB();
 
-
 // Importing Routes
 const userRoutes = require("./routes/userRoutes");
 const policyRoutes = require("./routes/policyRoutes");
 const claimRoutes = require("./routes/claimRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
+// Middlewares
 app.use(express.json());
+app.use(cookieParser());
 
 // Using Routes
 app.use("/users", userRoutes);

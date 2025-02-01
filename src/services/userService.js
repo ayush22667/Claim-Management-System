@@ -2,10 +2,11 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Policy = require("../models/Policy");
 const Policyholder = require("../models/Policyholder");
+const jwt = require("jsonwebtoken")
 
-const ADMIN_SECRET_KEY = "supersecureadminkey"; // Change this in production
+require("dotenv").config()
 
-// ✅ Register User (With Password Hashing)
+// Register User (With Password Hashing)
 exports.registerUser = async (data) => {
   let { name, email, password, role, adminKey } = data;
 
@@ -28,11 +29,11 @@ exports.registerUser = async (data) => {
     throw new Error("User already exists.");
   }
 
-  if (role === "Admin" && adminKey !== ADMIN_SECRET_KEY) {
+  if (role === "Admin" && adminKey !== process.env.ADMIN_SECRET_KEY) {
     throw new Error("Invalid Admin registration key.");
   }
 
-  // ✅ Hash password before saving
+  // Hash password before saving
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = new User({ name, email, password: hashedPassword, role });
@@ -40,21 +41,40 @@ exports.registerUser = async (data) => {
   return newUser;
 };
 
-// ✅ Login User (Compare Hashed Password)
+// Login User (Compare Hashed Password)
 exports.loginUser = async (email, password) => {
+
+  if (!email || !password) {
+    throw new Error("Please fill all details Carefully");
+  }
+
   email = email.trim().toLowerCase();
 
   const user = await User.findOne({ email });
-  if (!user) throw new Error("Invalid email or password.");
+  if (!user) throw new Error("User not Registered");
 
-  // ✅ Compare hashed password
+  // Compare hashed password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid email or password.");
 
-  return `Token_${user._id}_${Date.now()}`; // Mock authentication token
+  // Generate JWT token
+  const token = jwt.sign(
+    { userId: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "2h" }
+  );
+  
+  // Return user details & token
+  return {
+    message: "Login successful",
+    token,
+    userId: user._id,
+    email: user.email,
+    role: user.role 
+  };
 };
 
-// ✅ Update User
+// Update User
 exports.updateUser = async (userId, data) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
@@ -70,23 +90,30 @@ exports.updateUser = async (userId, data) => {
   return user;
 };
 
-// ✅ Soft Delete User (Instead of permanent deletion)
+// Delete User
 exports.deleteUser = async (userId) => {
+  // Check if the user exists
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
 
-  // Soft delete by marking `isDeleted: true`
-  await User.findByIdAndUpdate(userId, { isDeleted: true });
+  // Check if user has active policies
+  const policyholder = await Policyholder.findOne({ userId });
+  if (policyholder && policyholder.policies.length > 0) {
+    throw new Error("User cannot be deleted as they have active policies.");
+  }
 
-  return { message: "User account disabled successfully." };
+  // Permanently delete user
+  await User.findByIdAndDelete(userId);
+
+  return { message: "User account permanently deleted." };
 };
 
-// ✅ Get All Policies
+// Get All Policies
 exports.getAllPolicies = async () => {
   return await Policy.find();
 };
 
-// ✅ Buy Policy (Fixed Policyholder Logic)
+// Buy Policy (Fixed Policyholder Logic)
 exports.buyPolicy = async (userId, policyId) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
@@ -94,11 +121,11 @@ exports.buyPolicy = async (userId, policyId) => {
   const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy does not exist.");
 
-  // ✅ Check if the user is already a policyholder
+  //  Check if the user is already a policyholder
   let policyholder = await Policyholder.findOne({ userId });
 
   if (policyholder) {
-    // ✅ Convert ObjectId to string before checking
+    //  Convert ObjectId to string before checking
     const existingPolicies = policyholder.policies.map(p => p.toString());
     if (!existingPolicies.includes(policyId.toString())) {
       policyholder.policies.push(policyId);
@@ -112,7 +139,7 @@ exports.buyPolicy = async (userId, policyId) => {
   return { message: "Policy purchased successfully.", policyholder };
 };
 
-// ✅ Get User's Purchased Policies
+// Get User's Purchased Policies
 exports.getUserPolicies = async (userId) => {
   const policyholder = await Policyholder.findOne({ userId }).populate("policies");
   if (!policyholder) throw new Error("User has not purchased any policies.");

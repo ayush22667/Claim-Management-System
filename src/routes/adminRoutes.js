@@ -1,23 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
+const { authenticateUser, isAdmin } = require("../middleware/auth");
 
-// ✅ Create a new policy (Admin Only)
-router.post("/policies", adminController.createPolicy);
-
-// ✅ Update an existing policy (Admin Only)
-router.put("/policies/:id", adminController.updatePolicy);
-
-// ✅ Delete a policy (Admin Only)
-router.delete("/policies/:id", adminController.deletePolicy);
-
-// ✅ Get all policies (Admin View)
-router.get("/policies", adminController.getAllPolicies);
-
-// ✅ Get all purchased policies by users (Admin Only)
-router.get("/purchased-policies", adminController.getAllPurchasedPolicies);
-
-// ✅ Update claim status (Admin Approve/Reject)
-router.put("/claims/:id/status", adminController.updateClaimStatus);
+// Admin routes
+router.post("/policies",  authenticateUser, isAdmin,adminController.createPolicy);
+router.put("/policies/:id",  authenticateUser, isAdmin,adminController.updatePolicy);
+router.delete("/policies/:id",  authenticateUser, isAdmin,adminController.deletePolicy);
+router.get("/policies",  authenticateUser, isAdmin,adminController.getAllPolicies);
+router.get("/purchased-policies",  authenticateUser, isAdmin,adminController.getAllPurchasedPolicies);
+router.put("/claims/:id/status",  authenticateUser, isAdmin,adminController.updateClaimStatus);
 
 module.exports = router;

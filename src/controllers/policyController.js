@@ -1,6 +1,5 @@
 const policyService = require("../services/policyService");
 
-// ✅ Get All Policies
 exports.getAllPolicies = async (req, res) => {
   try {
     const policies = await policyService.getAllPolicies();
@@ -10,7 +9,6 @@ exports.getAllPolicies = async (req, res) => {
   }
 };
 
-// ✅ Get Policy by ID
 exports.getPolicyById = async (req, res) => {
   try {
     const policy = await policyService.getPolicyById(req.params.id);

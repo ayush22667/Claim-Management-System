@@ -1,6 +1,5 @@
 const userService = require("../services/userService");
 
-// ✅ Register User
 exports.registerUser = async (req, res) => {
   try {
     const newUser = await userService.registerUser(req.body);
@@ -10,18 +9,29 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// ✅ Login User
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const token = await userService.loginUser(email, password);
-    res.json({ message: "Login successful", token });
+    const { token, userId, email: userEmail, role } = await userService.loginUser(email, password);
+
+    const cookieOptions = {
+      expires: new Date(Date.now() +  15000), // 2 hours expiration
+      httpOnly: true, // Prevents access from JavaScript
+    };
+
+    //Set token in cookie & send response
+    res.cookie("token", token, cookieOptions).status(200).json({
+      message: "Login successful",
+      token,
+      userId,
+      email: userEmail,
+      role,
+    });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
 };
 
-// ✅ Update User
 exports.updateUser = async (req, res) => {
   try {
     const updatedUser = await userService.updateUser(req.params.id, req.body);
@@ -31,7 +41,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// ✅ Delete User (Soft Delete)
 exports.deleteUser = async (req, res) => {
   try {
     const message = await userService.deleteUser(req.params.id);
@@ -41,7 +50,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// ✅ Get All Policies
 exports.getAllPolicies = async (req, res) => {
   try {
     const policies = await userService.getAllPolicies();
@@ -51,7 +59,6 @@ exports.getAllPolicies = async (req, res) => {
   }
 };
 
-// ✅ Buy Policy (Stateful - MongoDB)
 exports.buyPolicy = async (req, res) => {
   try {
     const message = await userService.buyPolicy(req.body.userId, req.body.policyId);
@@ -61,7 +68,6 @@ exports.buyPolicy = async (req, res) => {
   }
 };
 
-// ✅ Get Policies Purchased by User
 exports.getUserPolicies = async (req, res) => {
   try {
     const userPolicies = await userService.getUserPolicies(req.params.userId);
