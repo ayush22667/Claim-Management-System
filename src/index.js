@@ -8,6 +8,9 @@ require("dotenv").config();
 // Connect to MongoDB
 connectDB();
 
+// Allow all origins
+app.use(cors());
+
 // Importing Routes
 const userRoutes = require("./routes/userRoutes");
 const policyRoutes = require("./routes/policyRoutes");

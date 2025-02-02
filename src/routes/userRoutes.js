@@ -22,4 +22,10 @@ router.get("/policies", authenticateUser, isUser, userController.getAllPolicies)
 router.post("/buy-policy", authenticateUser, isUser, userController.buyPolicy);
 router.get("/my-policies/:userId", authenticateUser, isUser, userController.getUserPolicies);
 
+//Forgot Password Route (Send Email)
+router.post("/forgot-password", userController.forgotPassword);
+
+//Reset Password Route (Set New Password)
+router.post("/reset-password", userController.resetPassword);
+
 module.exports = router;

@@ -3,6 +3,8 @@ const User = require("../models/User");
 const Policy = require("../models/Policy");
 const Policyholder = require("../models/Policyholder");
 const jwt = require("jsonwebtoken")
+const sendEmail = require("../utils/sendEmail");
+const crypto = require("crypto");
 
 require("dotenv").config()
 
@@ -145,4 +147,41 @@ exports.getUserPolicies = async (userId) => {
   if (!policyholder) throw new Error("User has not purchased any policies.");
 
   return policyholder.policies;
+};
+
+// Forgot Password (Send Email with Reset Link)
+exports.forgotPassword = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("User not registered.");
+
+  // Generate Reset Token
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiry
+  await user.save();
+
+  // Send Email with Reset Link
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  await sendEmail(user.email, "Password Reset Request", `Click to reset: ${resetLink}`);
+
+  return { message: "Password reset link sent to email." };
+};
+
+// Reset Password (Verify Token & Update Password)
+exports.resetPassword = async (token, newPassword) => {
+  const user = await User.findOne({ 
+    resetPasswordToken: token, 
+    resetPasswordExpires: { $gt: Date.now() } 
+  });
+
+  if (!user) throw new Error("Invalid or expired reset token.");
+
+  // Hash new password and update user
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  return { message: "Password reset successful. You can now log in." };
 };

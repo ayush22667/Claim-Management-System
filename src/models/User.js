@@ -22,6 +22,8 @@ const UserSchema = new mongoose.Schema({
   policies: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Policy" }],
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 });
 
 module.exports = mongoose.model("User", UserSchema);

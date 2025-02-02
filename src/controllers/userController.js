@@ -76,3 +76,23 @@ exports.getUserPolicies = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+//Forgot Password Controller
+exports.forgotPassword = async (req, res) => {
+  try {
+    const response = await userService.forgotPassword(req.body.email);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+//Reset Password Controller
+exports.resetPassword = async (req, res) => {
+  try {
+    const response = await userService.resetPassword(req.body.token, req.body.newPassword);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
