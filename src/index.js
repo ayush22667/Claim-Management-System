@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser');
+const cors = require("cors");
 
 const connectDB = require("./config/database"); // Import MongoDB connection
 require("dotenv").config();
