@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 "use strict";
 exports.config = {
   app_name: ["MyMERNApp"],
