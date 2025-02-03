@@ -12,19 +12,14 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { token, userId, email: userEmail, role } = await userService.loginUser(email, password);
+    const { token, userId, name, email: userEmail, role } = await userService.loginUser(email, password);
 
-    const cookieOptions = {
-      expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours expiration
-      httpOnly: true, // Prevents access from JavaScript
-    };
-    
-
-    //Set token in cookie & send response
-    res.cookie("token", token, cookieOptions).status(200).json({
+    // ✅ Send token and user details in JSON response
+    res.status(200).json({
       message: "Login successful",
-      token,
+      token, // ✅ Token returned in response
       userId,
+      name, // ✅ Added user name
       email: userEmail,
       role,
     });
@@ -32,6 +27,7 @@ exports.loginUser = async (req, res) => {
     res.status(401).json({ error: error.message });
   }
 };
+
 
 exports.updateUser = async (req, res) => {
   try {

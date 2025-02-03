@@ -1,12 +1,50 @@
+// const jwt = require("jsonwebtoken");
+
+// // Middleware to Verify Token from Cookie
+// exports.authenticateUser = (req, res, next) => {
+//   const token = req.cookies.token;
+
+//   if (!token) {
+//     return res.status(401).json({ message: "Unauthorized. Please log in." });
+//   }
+
+//   try {
+//     // Verify JWT Token
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = decoded; // Attach user info to request
+//     next();
+//   } catch (error) {
+//     return res.status(403).json({ message: "Invalid or expired token." });
+//   }
+// };
+
+// // Middleware to Allow Only Admins
+// exports.isAdmin = (req, res, next) => {
+//   if (!req.user || req.user.role !== "Admin") {
+//     return res.status(403).json({ message: "Access denied. Admins only." });
+//   }
+//   next();
+// };
+
+// // Middleware to Allow Only Users
+// exports.isUser = (req, res, next) => {
+//   if (!req.user || req.user.role !== "User") {
+//     return res.status(403).json({ message: "Access denied. Users only." });
+//   }
+//   next();
+// };
+
 const jwt = require("jsonwebtoken");
 
-// Middleware to Verify Token from Cookie
+// ✅ Middleware to Verify Token from Authorization Header
 exports.authenticateUser = (req, res, next) => {
-  const token = req.cookies.token;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized. Please log in." });
   }
+
+  const token = authHeader.split(" ")[1]; // ✅ Extract token from "Authorization: Bearer TOKEN"
 
   try {
     // Verify JWT Token
@@ -18,7 +56,7 @@ exports.authenticateUser = (req, res, next) => {
   }
 };
 
-// Middleware to Allow Only Admins
+// ✅ Middleware to Allow Only Admins
 exports.isAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "Admin") {
     return res.status(403).json({ message: "Access denied. Admins only." });
@@ -26,10 +64,11 @@ exports.isAdmin = (req, res, next) => {
   next();
 };
 
-// Middleware to Allow Only Users
+// ✅ Middleware to Allow Only Users
 exports.isUser = (req, res, next) => {
   if (!req.user || req.user.role !== "User") {
     return res.status(403).json({ message: "Access denied. Users only." });
   }
   next();
 };
+

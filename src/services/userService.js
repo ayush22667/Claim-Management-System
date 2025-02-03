@@ -43,17 +43,15 @@ exports.registerUser = async (data) => {
   return newUser;
 };
 
-// Login User (Compare Hashed Password)
 exports.loginUser = async (email, password) => {
-
   if (!email || !password) {
-    throw new Error("Please fill all details Carefully");
+    throw new Error("Please fill all details carefully");
   }
 
   email = email.trim().toLowerCase();
 
   const user = await User.findOne({ email });
-  if (!user) throw new Error("User not Registered");
+  if (!user) throw new Error("User not registered");
 
   // Compare hashed password
   const isMatch = await bcrypt.compare(password, user.password);
@@ -65,17 +63,17 @@ exports.loginUser = async (email, password) => {
     process.env.JWT_SECRET,
     { expiresIn: "2h" }
   );
-  
-  // Return user details & token
+
+  // ✅ Return user details & token
   return {
-    message: "Login successful",
     token,
     userId: user._id,
+    name: user.name || "", // ✅ Ensure `name` exists
     email: user.email,
-    role: user.role ,
-    name: user.name
+    role: user.role,
   };
 };
+
 
 // Update User
 exports.updateUser = async (userId, data) => {
