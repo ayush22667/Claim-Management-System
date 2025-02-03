@@ -4,6 +4,8 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const setupSwagger = require("./swaggerConfig");
+require("newrelic");
+
 
 const connectDB = require("./config/database"); 
 require("dotenv").config();
