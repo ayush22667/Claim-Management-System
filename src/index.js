@@ -1,63 +1,68 @@
+// Load environment variables
+require("dotenv").config();
+
+// Import Dependencies
 const express = require("express");
-const app = express();
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const setupSwagger = require("./swaggerConfig");
+const connectDB = require("./config/database");
 require("newrelic");
 
+// Initialize Express
+const app = express();
 
-const connectDB = require("./config/database"); 
-require("dotenv").config();
-
-// Connect to MongoDB
+//Connect to MongoDB
 connectDB();
 
+// Middleware Order
+app.use(express.json()); // Parse JSON requests
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
+app.use(cookieParser()); // Enable reading cookies
+
+// CORS Configuration
 const allowedOrigins = [
-  "http://localhost:3000"
+  "http://localhost:3000", 
 ];
 
 app.use(cors({
-  origin: allowedOrigins, 
-  credentials: true // ✅ Allow sending cookies & authentication headers
+  origin: allowedOrigins,
+  credentials: true, // ✅ Allow frontend to send cookies
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Set-Cookie"], // ✅ Ensures cookies can be accessed in frontend
 }));
 
-
-// Define a global rate limiter
+// ✅ Rate Limiting (Prevents Abuse)
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100, 
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Maximum 100 requests per window
     message: { error: "Too many requests, please try again later." },
     headers: true,
 });
-
-// Apply rate limiting to all routes
 app.use(apiLimiter);
+
+// ✅ Setup API Documentation (Swagger)
 setupSwagger(app);
 
-// Importing Routes
+// ✅ Import Routes
 const userRoutes = require("./routes/userRoutes");
 const policyRoutes = require("./routes/policyRoutes");
 const claimRoutes = require("./routes/claimRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
-// Middlewares
-app.use(express.json());
-app.use(cookieParser());
-
-// Using Routes
+// ✅ Register Routes
 app.use("/users", userRoutes);
 app.use("/policies", policyRoutes);
 app.use("/claims", claimRoutes);
 app.use("/admin", adminRoutes);
 
-// Load config from env file
-const PORT = process.env.PORT;
-
-// Default Route
+// ✅ Default Route (Root)
 app.get("/", (req, res) => {
-    res.send("Welcome to the StateFull Claims Management System!");
+    res.send("Welcome to the Stateful Claims Management System!");
 });
 
-// Start Server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ✅ Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
