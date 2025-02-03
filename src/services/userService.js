@@ -72,7 +72,8 @@ exports.loginUser = async (email, password) => {
     token,
     userId: user._id,
     email: user.email,
-    role: user.role 
+    role: user.role ,
+    name: user.name
   };
 };
 

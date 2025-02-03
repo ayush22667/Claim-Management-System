@@ -15,9 +15,10 @@ exports.loginUser = async (req, res) => {
     const { token, userId, email: userEmail, role } = await userService.loginUser(email, password);
 
     const cookieOptions = {
-      expires: new Date(Date.now() +  15000), // 2 hours expiration
+      expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours expiration
       httpOnly: true, // Prevents access from JavaScript
     };
+    
 
     //Set token in cookie & send response
     res.cookie("token", token, cookieOptions).status(200).json({

@@ -13,8 +13,15 @@ require("dotenv").config();
 // Connect to MongoDB
 connectDB();
 
-// Allow all origins
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000"
+];
+
+app.use(cors({
+  origin: allowedOrigins, 
+  credentials: true // ✅ Allow sending cookies & authentication headers
+}));
+
 
 // Define a global rate limiter
 const apiLimiter = rateLimit({
