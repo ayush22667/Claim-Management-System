@@ -115,7 +115,7 @@ exports.getAllPolicies = async () => {
   return await Policy.find();
 };
 
-// Buy Policy (Fixed Policyholder Logic)
+// Buy Policy 
 exports.buyPolicy = async (userId, policyId) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");

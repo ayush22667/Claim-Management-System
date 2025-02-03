@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
-const connectDB = require("./config/database"); // Import MongoDB connection
+const connectDB = require("./config/database"); 
 require("dotenv").config();
 
 // Connect to MongoDB
@@ -11,6 +12,17 @@ connectDB();
 
 // Allow all origins
 app.use(cors());
+
+// Define a global rate limiter
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100, 
+    message: { error: "Too many requests, please try again later." },
+    headers: true,
+});
+
+// Apply rate limiting to all routes
+app.use(apiLimiter);
 
 // Importing Routes
 const userRoutes = require("./routes/userRoutes");
@@ -28,14 +40,13 @@ app.use("/policies", policyRoutes);
 app.use("/claims", claimRoutes);
 app.use("/admin", adminRoutes);
 
-
-//load config from env file
-const PORT = process.env.PORT || 3000;
+// Load config from env file
+const PORT = process.env.PORT;
 
 // Default Route
 app.get("/", (req, res) => {
-  res.send("Welcome to the StateFull Claims Management System!");
+    res.send("Welcome to the StateFull Claims Management System!");
 });
 
-// Start Server;
+// Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

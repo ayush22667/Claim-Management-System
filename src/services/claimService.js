@@ -2,7 +2,7 @@ const Claim = require("../models/Claim");
 const Policy = require("../models/Policy");
 const Policyholder = require("../models/Policyholder");
 
-// ✅ Create a New Claim
+// Create a New Claim
 exports.createClaim = async ({
   userId,
   policyId,
@@ -14,7 +14,7 @@ exports.createClaim = async ({
     throw new Error("All fields are required.");
   }
 
-  // ✅ Ensure user owns the policy
+  // Ensure user owns the policy
   const policyholder = await Policyholder.findOne({
     userId,
     policies: policyId,
@@ -22,18 +22,18 @@ exports.createClaim = async ({
   if (!policyholder)
     throw new Error("User does not own this policy and cannot file a claim.");
 
-  // ✅ Ensure policy exists
+  // Ensure policy exists
   const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy not found.");
 
-  // ✅ Check claim amount
+  // Check claim amount
   if (amount > policy.coverageAmount) {
     throw new Error(
       `Claim amount cannot exceed policy coverage amount (${policy.coverageAmount}).`
     );
   }
 
-  // ✅ Save claim in MongoDB
+  //Save claim in MongoDB
   const newClaim = new Claim({
     userId,
     policyId,
@@ -45,7 +45,7 @@ exports.createClaim = async ({
   return await newClaim.save();
 };
 
-// ✅ Get All Claims for a User
+// Get All Claims for a User
 exports.getClaimsByUser = async (userId) => {
   return await Claim.find({ userId }).populate(
     "policyId",
@@ -53,7 +53,7 @@ exports.getClaimsByUser = async (userId) => {
   );
 };
 
-// ✅ Delete a Claim
+// Delete a Claim
 exports.deleteClaim = async (claimId, userId) => {
   const claim = await Claim.findById(claimId);
   if (!claim) throw new Error("Claim not found.");
