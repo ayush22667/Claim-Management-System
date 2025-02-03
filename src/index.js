@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
+const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
+const setupSwagger = require("./swaggerConfig");
 
 const connectDB = require("./config/database"); 
 require("dotenv").config();
@@ -23,6 +24,7 @@ const apiLimiter = rateLimit({
 
 // Apply rate limiting to all routes
 app.use(apiLimiter);
+setupSwagger(app);
 
 // Importing Routes
 const userRoutes = require("./routes/userRoutes");
