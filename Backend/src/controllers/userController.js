@@ -15,9 +15,12 @@ exports.loginUser = async (req, res) => {
     const { token, userId, email: userEmail, role, name } = await userService.loginUser(email, password);
 
     const cookieOptions = {
-      expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      
+      expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2-hour expiry
+      httpOnly: true, // Prevents client-side access (security)
+      secure: true, // Ensures cookies are sent only over HTTPS (required in production)
+      sameSite: "none", // Required for cross-site cookies (frontend and backend are different domains)
     };
+    
 
     //Set token in cookie & send response
     res.cookie("token", token, cookieOptions).status(200).json({
