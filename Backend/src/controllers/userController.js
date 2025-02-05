@@ -16,7 +16,9 @@ exports.loginUser = async (req, res) => {
 
     const cookieOptions = {
       expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      // httpOnly: true,
+      httpOnly: true,
+      secure: false,  
+      sameSite: "lax", 
     };
 
     //Set token in cookie & send response
