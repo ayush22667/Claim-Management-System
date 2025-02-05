@@ -10,17 +10,17 @@ router.post("/register", userController.registerUser);
 router.post("/login", userController.loginUser);
 
 // Update user details
-router.put("/:id", userController.updateUser);
+router.put("/:id", authenticateUser, isUser, userController.updateUser);
 
-// Soft delete user
-router.delete("/:id", userController.deleteUser);
+//delete user
+router.delete("/:id", authenticateUser, isUser,userController.deleteUser);
 
 // Get all available policies
-router.get("/policies", userController.getAllPolicies);
+router.get("/policies", authenticateUser, isUser,userController.getAllPolicies);
 
 //Buy a policy (User becomes policyholder)
-router.post("/buy-policy",userController.buyPolicy);
-router.get("/my-policies/:userId", userController.getUserPolicies);
+router.post("/buy-policy",authenticateUser, isUser,userController.buyPolicy);
+router.get("/my-policies/:userId", authenticateUser, isUser,userController.getUserPolicies);
 
 //Forgot Password Route (Send Email)
 router.post("/forgot-password", userController.forgotPassword);
