@@ -11,22 +11,13 @@ require("dotenv").config();
 connectDB();
 
 app.use(cors({
-    origin: [
-        "http://localhost:3000",
-        "https://claim-management-system-1-5pzo.onrender.com/"
-    ],
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.options("*", cors({
-    origin: [
-        "http://localhost:3000",
-        "https://claim-management-system-1-5pzo.onrender.com/"
-    ],
-    credentials: true
-}));
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -40,11 +31,6 @@ const apiLimiter = rateLimit({
 
 app.use(apiLimiter);
 setupSwagger(app);
-
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Credentials", "true");
-    next();
-});
 
 const userRoutes = require("./routes/userRoutes");
 const policyRoutes = require("./routes/policyRoutes");
