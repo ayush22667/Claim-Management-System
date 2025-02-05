@@ -4,9 +4,9 @@ const policyController = require("../controllers/policyController");
 const { authenticateUser, isUser } = require("../middleware/auth");
 
 //Get all policies (Available to everyone)
-router.get("/", authenticateUser, isUser, policyController.getAllPolicies);
+router.get("/",policyController.getAllPolicies);
 
 // Get a policy by ID (Available to everyone)
-router.get("/:id", authenticateUser, isUser, policyController.getPolicyById);
+router.get("/:id", policyController.getPolicyById);
 
 module.exports = router;

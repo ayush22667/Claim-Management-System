@@ -7,9 +7,9 @@ const { authenticateUser, isUser } = require("../middleware/auth");
 router.post("/", claimController.createClaim);
 
 // Get all claims for a specific user
-router.get("/user/:userId", authenticateUser, isUser, claimController.getClaimsByUser);
+router.get("/user/:userId", claimController.getClaimsByUser);
 
 // Delete a claim (Users can cancel only "Pending" claims)
-router.delete("/:id", authenticateUser, isUser, claimController.deleteClaim);
+router.delete("/:id", claimController.deleteClaim);
 
 module.exports = router;
