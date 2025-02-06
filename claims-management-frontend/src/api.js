@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_BASE_URL = "https://claim-management-system-1-23yj.onrender.com";
 
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

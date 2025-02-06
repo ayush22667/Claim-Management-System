@@ -35,7 +35,7 @@ function ManageClaims() {
   const handleUpdateClaimStatus = async (claimId, status) => {
     try {
   
-      const response = await api.put(
+      await api.put(
         `/admin/claims/${claimId}/status`,
         { status }, 
         { headers: { "Content-Type": "application/json" } } 

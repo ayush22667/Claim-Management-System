@@ -7,8 +7,14 @@ function UserDashboard() {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
 
   useEffect(() => {
     // Get userId and name from localStorage
@@ -20,7 +26,6 @@ function UserDashboard() {
       return;
     }
 
-    setUserId(storedUserId);
     setName(storedName || "User");
 
     const fetchUserPolicies = async () => {
@@ -49,12 +54,7 @@ function UserDashboard() {
     fetchUserPolicies();
   }, []);
 
-  // Logout function
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
-
+  
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       {/* ✅ Navigation Bar */}
