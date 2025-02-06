@@ -16,7 +16,7 @@ router.put("/:id", authenticateUser, isUser, userController.updateUser);
 router.delete("/:id", authenticateUser, isUser,userController.deleteUser);
 
 // Get all available policies
-router.get("/policies", authenticateUser, isUser,userController.getAllPolicies);
+router.get("/policies",userController.getAllPolicies);
 
 //Buy a policy (User becomes policyholder)
 router.post("/buy-policy",authenticateUser, isUser,userController.buyPolicy);
