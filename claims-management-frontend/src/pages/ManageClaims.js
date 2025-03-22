@@ -87,51 +87,52 @@ function ManageClaims() {
 
         {/* ✅ Loading Animation */}
         {loading ? (
-          <div className="flex justify-center items-center mt-6">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-          </div>
-        ) : claims.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-            {claims.map((claim) => (
-              <div key={claim._id} className="p-6 border border-gray-300 rounded-lg shadow-md bg-gray-50">
-                <h3 className="text-lg font-semibold text-blue-700">
-                  Claim ID: {claim._id}
-                </h3>
+  <div className="flex justify-center items-center mt-6">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+  </div>
+) : claims.filter(claim => claim.status === "Pending").length > 0 ? (
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+    {claims
+      .filter(claim => claim.status === "Pending") // ✅ Show only Pending claims
+      .map((claim) => (
+        <div key={claim._id} className="p-6 border border-gray-300 rounded-lg shadow-md bg-gray-50">
+          <h3 className="text-lg font-semibold text-blue-700">
+            Claim ID: {claim._id}
+          </h3>
 
-                <p className="text-gray-600"><strong>User:</strong> {claim.userId.name}</p>
-                <p className="text-gray-600"><strong>Policy:</strong> {claim.policyId.policyNumber} ({claim.policyId.type})</p>
-                <p className="text-gray-600"><strong>Coverage:</strong> ${claim.policyId.coverageAmount}</p>
-                <p className="text-gray-600"><strong>Claim Amount:</strong> ${claim.amount}</p>
-                <p className="text-gray-600"><strong>Status:</strong> 
-                  <span className={`font-bold ${claim.status === "Approved" ? "text-green-500" : claim.status === "Rejected" ? "text-red-500" : "text-yellow-500"}`}>
-                    {claim.status}
-                  </span>
-                </p>
-                <p className="text-gray-600"><strong>Filed On:</strong> {new Date(claim.dateFiled).toLocaleDateString()}</p>
+          <p className="text-gray-600"><strong>User:</strong> {claim.userId.name}</p>
+          <p className="text-gray-600"><strong>Policy:</strong> {claim.policyId.policyNumber} ({claim.policyId.type})</p>
+          <p className="text-gray-600"><strong>Coverage:</strong> ${claim.policyId.coverageAmount}</p>
+          <p className="text-gray-600"><strong>Claim Amount:</strong> ${claim.amount}</p>
+          <p className="text-gray-600"><strong>Status:</strong> 
+            <span className="font-bold text-yellow-500">
+              {claim.status}
+            </span>
+          </p>
+          <p className="text-gray-600"><strong>Filed On:</strong> {new Date(claim.dateFiled).toLocaleDateString()}</p>
 
-                {/* ✅ Approve & Reject Buttons */}
-                {claim.status === "Pending" && (
-                  <div className="mt-3 flex flex-col space-y-2">
-                    <button
-                      onClick={() => handleUpdateClaimStatus(claim._id, "Approved")}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200"
-                    >
-                      ✅ Approve
-                    </button>
-                    <button
-                      onClick={() => handleUpdateClaimStatus(claim._id, "Rejected")}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200"
-                    >
-                      ❌ Reject
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+          {/* ✅ Approve & Reject Buttons */}
+          <div className="mt-3 flex flex-col space-y-2">
+            <button
+              onClick={() => handleUpdateClaimStatus(claim._id, "Approved")}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200"
+            >
+              ✅ Approve
+            </button>
+            <button
+              onClick={() => handleUpdateClaimStatus(claim._id, "Rejected")}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200"
+            >
+              ❌ Reject
+            </button>
           </div>
-        ) : (
-          <p className="text-gray-500 text-center mt-6">No claims available.</p>
-        )}
+        </div>
+      ))}
+  </div>
+) : (
+  <p className="text-gray-500 text-center mt-6">No pending claims available.</p>
+)}
+
       </div>
     </div>
   );

@@ -24,6 +24,8 @@ function ResetPassword() {
     try {
       const response = await api.post("/users/reset-password", { token, newPassword });
       setMessage(response.data.message);
+      setNewPassword("");
+      setConfirmPassword("");
       setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
       setMessage(err.response?.data?.message || "Failed to reset password.");

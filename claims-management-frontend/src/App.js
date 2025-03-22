@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Signup from "./pages/Signup"; // Import Signup Page
-import Login from "./pages/Login"; // Import Login Page
+import Signup from "./pages/Signup"; 
+import Login from "./pages/Login"; 
 import UserDashboard from "./pages/UserDashboard";
 import BuyPolicy from "./pages/BuyPolicy";
 import FileClaim from "./pages/FileClaim";
@@ -12,6 +12,8 @@ import AdminManagePolicies from "./pages/AdminManagePolicies";
 import ManageClaims from "./pages/ManageClaims";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminPolicyRequests from "./pages/AdminPolicyRequests";
+
 
 function Home() {
   return (
@@ -85,7 +87,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={< Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/BuyPolicy" element={<BuyPolicy />} />
         <Route path="/FileClaim" element={<FileClaim />} />
@@ -97,6 +99,8 @@ function App() {
         <Route path="/admin/manage-claims" element={<ManageClaims />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin/policy-requests" element={<AdminPolicyRequests />} />
+        
 
 
       </Routes>

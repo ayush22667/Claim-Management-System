@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import api from "../api";
 
 function BuyPolicy() {
@@ -47,7 +48,7 @@ function BuyPolicy() {
 
     // Check if the policy is already purchased
     if (purchasedPolicies.includes(policyId)) {
-      alert("⚠️ You have already purchased this policy!");
+      toast.error("You have already purchased this policy!");
       return;
     }
 
@@ -57,19 +58,19 @@ function BuyPolicy() {
     endDate.setFullYear(today.getFullYear() + duration);
 
     try {
-      await api.post("/users/buy-policy", {
+      const response = await api.post("/users/buy-policy", {
         userId,
         policyId,
         startDate: today,
         endDate: endDate,
       });
 
-      setSuccessMessage("✅ Policy purchased successfully!");
+      toast.success(response.data.message);
       setPurchasedPolicies([...purchasedPolicies, policyId]);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "❌ Failed to buy policy. Please try again.";
-      setError(errorMessage);
+      const errorMessage = err.response.data.error;
+      toast.error(errorMessage);
       setTimeout(() => setError(""), 3000);
     }
   };

@@ -26,7 +26,13 @@ function FileClaim() {
     const fetchPolicies = async () => {
       try {
         const response = await api.get(`/users/my-policies/${userId}`);
-        setPolicies(response.data);
+        console.log("Fetched Policies:", response.data);
+        
+        if (Array.isArray(response.data)) {
+          setPolicies(response.data);
+        } else {
+          setError("Invalid response format.");
+        }
       } catch (err) {
         setError("Failed to fetch policies.");
       }
@@ -39,6 +45,22 @@ function FileClaim() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // Find the selected policy to check coverage amount
+    const selectedPolicy = policies.find((policy) => policy.policyId._id === claimData.policyId);
+
+    if (!selectedPolicy) {
+      setError("Invalid policy selection.");
+      return;
+    }
+
+    const maxCoverageAmount = selectedPolicy.policyId.coverageAmount;
+
+    // Validate claim amount
+    if (Number(claimData.amount) > maxCoverageAmount) {
+      setError(`Claim amount cannot exceed coverage amount ($${maxCoverageAmount}).`);
+      return;
+    }
 
     // Validate document link
     if (!claimData.documentLink.startsWith("http")) {
@@ -107,8 +129,8 @@ function FileClaim() {
               >
                 <option value="">-- Choose Policy --</option>
                 {policies.map((policy) => (
-                  <option key={policy.policyNumber} value={policy._id}>
-                    {policy.type} - {policy.policyNumber}
+                  <option key={policy._id} value={policy.policyId._id}>
+                    {policy.policyId.policyNumber} - Coverage: ${policy.policyId.coverageAmount}
                   </option>
                 ))}
               </select>
