@@ -2,6 +2,7 @@ const claimService = require("../services/claimService");
 
 exports.createClaim = async (req, res) => {
   try {
+    console.log(req.body);
     const newClaim = await claimService.createClaim(req.body);
     res.status(201).json(newClaim);
   } catch (error) {

@@ -2,9 +2,12 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Policy = require("../models/Policy");
 const Policyholder = require("../models/Policyholder");
+const PolicyRequest = require("../models/PolicyRequest");
 const jwt = require("jsonwebtoken")
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+// const generateWelcomeEmail = require("../services/geminiService");
+const { createContact } = require("./mauticService");
 
 require("dotenv").config()
 
@@ -40,9 +43,10 @@ exports.registerUser = async (data) => {
 
   const newUser = new User({ name, email, password: hashedPassword, role });
   await newUser.save();
+  const contactId = await createContact({ name, email });
+
   return newUser;
 };
-
 // Login User (Compare Hashed Password)
 exports.loginUser = async (email, password) => {
 
@@ -118,38 +122,51 @@ exports.getAllPolicies = async () => {
 };
 
 // Buy Policy 
-exports.buyPolicy = async (userId, policyId) => {
+exports.buyPolicy = async (userId, policyId, startDate, endDate) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found.");
 
   const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy does not exist.");
 
-  //  Check if the user is already a policyholder
-  let policyholder = await Policyholder.findOne({ userId });
-
-  if (policyholder) {
-    //  Convert ObjectId to string before checking
-    const existingPolicies = policyholder.policies.map(p => p.toString());
-    if (!existingPolicies.includes(policyId.toString())) {
-      policyholder.policies.push(policyId);
-      await policyholder.save();
-    }
-  } else {
-    policyholder = new Policyholder({ userId, policies: [policyId] });
-    await policyholder.save();
+  // Check if the user has already requested this policy
+  const existingRequest = await PolicyRequest.findOne({ userId, policyId, status: "Pending" });
+  if (existingRequest) {
+    throw new Error("You have already requested this policy. Please wait for admin approval.");
   }
 
-  return { message: "Policy purchased successfully.", policyholder };
+  // Save the policy request for admin approval
+  const policyRequest = new PolicyRequest({
+    userId,
+    policyId,
+    startDate,
+    endDate,
+    status: "Pending", // Admin needs to approve it
+  });
+  console.log(policyRequest);
+
+  await policyRequest.save();
+
+  return { message: "Your policy request has been submitted for admin approval." };
 };
+
+
+
 
 // Get User's Purchased Policies
 exports.getUserPolicies = async (userId) => {
-  const policyholder = await Policyholder.findOne({ userId }).populate("policies");
+  const policyholder = await Policyholder.findOne({ userId })
+    .populate({
+      path: "policies.policyId", // Populate policyId from Policy collection
+      select: "policyNumber coverageAmount" // Fetch specific fields
+    })
+    .lean(); // Convert to plain JSON object
+
   if (!policyholder) throw new Error("User has not purchased any policies.");
 
   return policyholder.policies;
 };
+
 
 // Forgot Password (Send Email with Reset Link)
 exports.forgotPassword = async (email) => {

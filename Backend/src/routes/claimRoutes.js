@@ -4,7 +4,7 @@ const claimController = require("../controllers/claimController");
 const { authenticateUser, isUser } = require("../middleware/auth");
 
 
-router.post("/", authenticateUser, isUser,claimController.createClaim);
+router.post("/", authenticateUser, isUser, claimController.createClaim);
 
 // Get all claims for a specific user
 router.get("/user/:userId", authenticateUser, isUser,claimController.getClaimsByUser);

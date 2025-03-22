@@ -1,27 +1,45 @@
+require("newrelic");
 const express = require("express");
 const app = express();
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const setupSwagger = require("./swaggerConfig");
-require("newrelic");
 const connectDB = require("./config/database");
 require("dotenv").config();
 
 connectDB();
 
 
-const whitelist = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",") 
-  : ["*"];
+// const whitelist = process.env.CORS_ORIGIN
+//   ? process.env.CORS_ORIGIN.split(",") 
+//   : ["*"];
 
-app.use(
-  cors({
-    origin: whitelist,
-    credentials: true,
-    maxAge: 14400,
-  })
-);
+// app.use(
+//   cors({
+//     origin: whitelist,
+//     credentials: true,
+//     maxAge: 14400,
+//   })
+// );
+
+const whitelist = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map(origin => origin.trim())
+  : ["http://localhost:3000"];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || whitelist.includes(origin)) {
+      callback(null, true); // Allow request
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Allow cookies/session
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Handle preflight requests
+
 
 
 app.use(express.json());

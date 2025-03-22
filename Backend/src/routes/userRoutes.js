@@ -19,7 +19,7 @@ router.delete("/:id", authenticateUser, isUser,userController.deleteUser);
 router.get("/policies",userController.getAllPolicies);
 
 //Buy a policy (User becomes policyholder)
-router.post("/buy-policy",authenticateUser, isUser,userController.buyPolicy);
+router.post("/buy-policy",userController.buyPolicy);
 router.get("/my-policies/:userId", authenticateUser, isUser,userController.getUserPolicies);
 
 //Forgot Password Route (Send Email)

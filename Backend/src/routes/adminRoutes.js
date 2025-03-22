@@ -11,5 +11,7 @@ router.get("/policies",  authenticateUser, isAdmin,adminController.getAllPolicie
 router.get("/purchased-policies", authenticateUser, isAdmin,adminController.getAllPurchasedPolicies);
 router.get("/claims",authenticateUser, isAdmin, adminController.getAllClaims);
 router.put("/claims/:id/status", authenticateUser, isAdmin, adminController.updateClaimStatus);
+router.get("/pending-requests", adminController.getPendingPolicyRequests);
+router.post("/approve-policy", adminController.approvePolicyPurchase);
 
 module.exports = router;

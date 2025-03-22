@@ -69,3 +69,24 @@ exports.getAllClaims = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+exports.getPendingPolicyRequests = async (req, res) => {
+  try {
+    const pendingRequests = await adminService.getPendingPolicyRequests();
+    res.status(200).json(pendingRequests);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+exports.approvePolicyPurchase = async (req, res) => {
+  try {
+    const { requestId, action } = req.body;
+    const response = await adminService.approvePolicyPurchase(requestId, action);
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};

@@ -15,10 +15,10 @@ exports.loginUser = async (req, res) => {
     const { token, userId, email: userEmail, role, name } = await userService.loginUser(email, password);
 
     const cookieOptions = {
-      expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2-hour expiry
-      httpOnly: true, // Prevents client-side access (security)
-      secure: true, // Ensures cookies are sent only over HTTPS (required in production)
-      sameSite: "none", // Required for cross-site cookies (frontend and backend are different domains)
+      expires: new Date(Date.now() + 2 * 60 * 60 * 1000), 
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
     };
     
 
@@ -63,14 +63,25 @@ exports.getAllPolicies = async (req, res) => {
   }
 };
 
+// exports.buyPolicy = async (req, res) => {
+//   try {
+//     const message = await userService.buyPolicy(req.body.userId, req.body.policyId);
+//     res.json(message);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 exports.buyPolicy = async (req, res) => {
   try {
-    const message = await userService.buyPolicy(req.body.userId, req.body.policyId);
-    res.json(message);
+    const { userId, policyId, startDate, endDate } = req.body;
+    const response = await userService.buyPolicy(userId, policyId, startDate, endDate);
+    res.status(200).json(response);
   } catch (error) {
     res.status(400).json({ error: error.message });
+
   }
 };
+
 
 exports.getUserPolicies = async (req, res) => {
   try {
